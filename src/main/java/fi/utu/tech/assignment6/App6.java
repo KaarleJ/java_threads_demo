@@ -17,12 +17,50 @@ import fi.utu.tech.common.SubmissionGenerator.Strategy;
 
 public class App6 {
     public static void main(String[] args) {
+
+        // Otetaan funktion aloitusaika talteen suoritusajan laskemista varten
+        long startTime = System.currentTimeMillis();
+
         // Generoidaan kasa esimerkkitehtäväpalautuksia
         List<Submission> ungradedSubmissions = SubmissionGenerator.generateSubmissions(21, 200, Strategy.UNFAIR);
 
-        // Kopioi edellisen tehtävän ratkaisu tähän lähtökohdaksi
-        // Voit käyttää yllä olevaa riviä palautusten generointiin. Se ei vaikuta ratkaisuun, mutta
-        // "epäreilu" strategia tekee yhdestä palautuksesta paljon muita haastavamman tarkistettavan,
-        // demonstroiden dynaamisen työnjaon etuja paremmin.
+        // Tulostetaan tiedot esimerkkipalautuksista ennen arviointia
+        for (var ug : ungradedSubmissions) {
+            System.out.println(ug);
+        }
+
+        // Allokoidaan palautukset arviointitehtäviin
+        List<GradingTask> gradingTasks = TaskAllocator.allocate(ungradedSubmissions, 10);
+
+        // Luodaan säikeet arviointitehtäville
+        List<Thread> gradingThreads = new ArrayList<>();
+        ExecutorService executor = Executors.newFixedThreadPool(10);
+        for (var gt : gradingTasks) {
+            gradingThreads.add(new Thread(gt));
+            executor.execute(gt);
+        }
+
+        // Lopetetaan uusien säikeiden lisääminen ja odotetaan suorituksen loppumista
+        executor.shutdown();
+        try {
+            executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+        } catch (InterruptedException e) {
+            System.err.println("Who dared to interrupt my sleep?!");
+        }
+
+        // Otetaan arvioidut palautukset talteen
+        List<Submission> gradedSubmissions = new ArrayList<>();
+        for (var gt : gradingTasks) {
+            gradedSubmissions.addAll(gt.getGradedSubmissions());
+        }
+
+        // Tulostetaan arvioidut palautukset
+        System.out.println("------------ CUT HERE ------------");
+        for (var gs : gradedSubmissions) {
+            System.out.println(gs);
+        }
+
+        // Lasketaan funktion suoritusaika
+        System.out.printf("Total time for grading: %d ms%n", System.currentTimeMillis() - startTime);
     }
 }
