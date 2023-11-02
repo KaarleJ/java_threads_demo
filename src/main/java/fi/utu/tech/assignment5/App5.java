@@ -26,7 +26,7 @@ public class App5 {
         }
 
         // Allokoidaan palautukset arviointitehtäviin
-        List<GradingTask> gradingTasks = TaskAllocator.allocate(ungradedSubmissions, 20);
+        List<GradingTask> gradingTasks = TaskAllocator.allocate(ungradedSubmissions, 10);
         // Luodaan säikeet arviointitehtäville
         List<Thread> gradingThreads = new ArrayList<>();
         for (var gt : gradingTasks) {

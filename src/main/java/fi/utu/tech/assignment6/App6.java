@@ -30,20 +30,18 @@ public class App6 {
         }
 
         // Allokoidaan palautukset arviointitehtäviin
-        List<GradingTask> gradingTasks = TaskAllocator.allocate(ungradedSubmissions, 10);
+        List<GradingTask> gradingTasks = TaskAllocator.allocate(ungradedSubmissions, 6);
 
-        // Luodaan säikeet arviointitehtäville
-        List<Thread> gradingThreads = new ArrayList<>();
-        ExecutorService executor = Executors.newFixedThreadPool(10);
+        // Syötetään arviointitehtävät executorille execute metodilla.
+        ExecutorService executor = Executors.newFixedThreadPool(6);
         for (var gt : gradingTasks) {
-            gradingThreads.add(new Thread(gt));
             executor.execute(gt);
         }
 
         // Lopetetaan uusien säikeiden lisääminen ja odotetaan suorituksen loppumista
         executor.shutdown();
         try {
-            executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+            executor.awaitTermination(Long.MAX_VALUE, TimeUnit.MILLISECONDS);
         } catch (InterruptedException e) {
             System.err.println("Who dared to interrupt my sleep?!");
         }
